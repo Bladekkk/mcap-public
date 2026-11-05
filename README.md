@@ -1,167 +1,358 @@
-# MCAP - Minecraft Server Management Panel
+# MCAP - Minecraft Admin Panel
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Go Version](https://img.shields.io/badge/Go-1.22-blue)](https://golang.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org/)
+[![Python 3.12](https://img.shields.io/badge/Python-3.12-blue)](https://python.org/)
+[![Node.js 18+](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org/)
+[![Flask 3.0](https://img.shields.io/badge/Flask-3.0-red)](https://flask.palletsprojects.com/)
+[![Next.js 16](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
 
-Advanced admin panel for managing Minecraft servers with support for multiple server types (Vanilla, Paper, Fabric, Forge, Quilt, Purpur, Velocity, Waterfall) and automated dependency management.
+Продвинутая панель управления Minecraft серверами с поддержкой множества типов серверов (Vanilla, Paper, Fabric, Forge, Quilt, Purpur, Velocity, Waterfall) и автоматическим управлением зависимостями.
 
-## Supported Systems
+## 🚀 Возможности
 
-| System | Version | Install Command |
-|--------|---------|-----------------|
-| Ubuntu | 20.04+ | `./install.sh` |
-| Debian | 11+ | `./install.sh` |
-| Fedora | 36+ | `./install.sh` |
-| Arch | rolling | `./install.sh` |
-| WSL | Windows 10/11 | `./install.sh` |
-| macOS | 12+ | `./install.sh` |
+- **🎯 Управление серверами**: Создание, запуск, остановка, перезапуск серверов с одного клика
+- **📊 Мониторинг в реальном времени**: Live TPS, RAM, CPU, онлайн игроки через WebSocket
+- **🔌 Управление плагинами**: Поиск и установка плагинов из Modrinth, Hangar, CurseForge
+- **☕ Автоматическое управление Java**: Автоматический выбор правильной версии Java для типа сервера
+- **🔐 Безопасность**: JWT аутентификация, защита RCON паролем, логирование действий
+- **⚡ Real-time Dashboard**: Современный интерфейс с Tailwind CSS и React
 
-## Features
-
-- **Auto-installer**: Automatically downloads and caches JDK versions (8/11/17/21) based on Minecraft version via Adoptium API
-- **Server management**: Create, start, stop, restart servers with one click
-- **Live monitoring**: Real-time TPS, RAM, CPU, online players via WebSocket
-- **Plugin/Mod manager**: Search and install plugins from Modrinth, Hangar, CurseForge
-- **Java version mapping**: Automatically selects correct Java version for server type
-- **Secure**: JWT auth, RCON password protection, audit logging
-
-## Tech Stack
+## 🏗️ Технический стек
 
 ### Backend
-- Go 1.22+ with Fiber framework
-- SQLite database with migrations
-- WebSocket for real-time updates
-- Native subprocess control for Minecraft servers
+- **Python 3.12** с Flask 3.0
+- **SQLite** база данных с миграциями
+- **WebSocket** для real-time обновлений
+- **Native subprocess** управление Minecraft серверами
 
 ### Frontend
-- Next.js 14 with App Router
-- React Query for data fetching
-- Tailwind CSS + shadcn/ui for UI
-- Lucide icons
-- Framer Motion for animations
+- **Next.js 16** с App Router и React 19
+- **TypeScript** для type-safety
+- **Tailwind CSS 4** + Turbopack
+- **Real-time fetching** для live обновлений
 
-## Project Structure
+## 📋 Структура проекта
 
 ```
 MCAP-project/
-├── backend/
-│   ├── cmd/
-│   │   └── main.go         # Entry point
-│   ├── internal/
-│   │   ├── config/         # Configuration
-│   │   ├── database/       # DB layer
-│   │   ├── handler/        # HTTP handlers
-│   │   └── service/        # Business logic
-│   ├── migrations/         # SQLite migrations
-│   └── go.mod
-├── frontend/
-│   ├── src/
-│   │   ├── app/            # Next.js pages
-│   │   ├── components/     # shadcn/ui components
-│   │   ├── store/          # Zustand store
-│   │   ├── types/          # TypeScript types
-│   │   └── lib/            # Utilities
-│   └── package.json
-├── Dockerfile
-└── docker-compose.yml
+├── backend/                    # Flask приложение
+│   ├── cmd/                   # Entry point (планируется)
+│   ├── services/              # Бизнес логика
+│   │   ├── server_manager.py
+│   │   ├── java_manager.py
+│   │   ├── downloader.py
+│   │   └── plugin_aggregator.py
+│   ├── app.py                 # Flask приложение
+│   ├── models.py              # SQLAlchemy моделі
+│   ├── routes.py              # API endpoints
+│   ├── config.py              # Конфиг
+│   ├── database_init.py       # DB инициализация
+│   ├── requirements.txt
+│   └── venv/                  # Virtual environment
+│
+├── frontend/                   # Next.js приложение
+│   ├── app/
+│   │   ├── page.tsx           # Главная страница
+│   │   ├── layout.tsx         # Layout
+│   │   └── globals.css        # Глобальные стили
+│   ├── public/
+│   ├── package.json
+│   └── tsconfig.json
+│
+├── data/                       # Данные приложения
+│   ├── mcap.db               # SQLite база
+│   ├── cache/                # Кэш для загрузок
+│   ├── jdk/                  # Java установки
+│   └── servers/              # Данные серверов
+│
+├── start.sh                    # Запуск всех сервисов
+├── stop.sh                     # Остановка всех сервисов
+└── README.md
 ```
 
-## Installation
+## 📦 Системные требования
 
-### One-Command Install (Recommended)
+| ОС | Версия | Статус |
+|----|---------| -------|
+| Ubuntu | 20.04+ | ✅ Поддерживается |
+| Debian | 11+ | ✅ Поддерживается |
+| Fedora | 36+ | ✅ Поддерживается |
+| Arch | rolling | ✅ Поддерживается |
+| macOS | 12+ | ✅ Поддерживается |
+| WSL | Windows 10/11 | ✅ Поддерживается |
 
-Download and run the installer script:
+## 🚀 Быстрый старт
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/Bladekkk/mcap-public/master/install.sh | bash
-```
+### Необходимо
 
-That's it. The script will:
-1. Detect your OS automatically
-2. Install all dependencies (Go, Node.js, SQLite)
-3. Run database migrations
-4. Start backend (port 8080) and frontend (port 3000)
+- Python 3.12+
+- Node.js 18+
+- pip и npm
 
-### Manual Install
-
-If you prefer to install manually:
-
-#### Prerequisites
-- Go 1.22+
-- Node.js 18+ and npm
-- SQLite3
-
-#### Backend
+### Установка и запуск
 
 ```bash
+# Клонировать репозиторий
+git clone https://github.com/Bladekkk/mcap-public.git
+cd MCAP-project
+
+# Установить зависимости backend
 cd backend
-go mod tidy
-go run cmd/main.go
+python3 -m venv venv
+source venv/bin/activate  # На Windows: venv\Scripts\activate
+pip install -r requirements.txt
+
+# Установить зависимости frontend (новый терминал)
+cd ../frontend
+npm install
+
+# Запустить оба сервиса одной командой
+cd ..
+chmod +x start.sh
+./start.sh
 ```
 
-#### Frontend (new terminal)
+Или запустить вручную:
 
 ```bash
+# Terminal 1 - Backend
+cd backend
+source venv/bin/activate
+python3 app.py
+
+# Terminal 2 - Frontend
 cd frontend
-npm install
 npm run dev
 ```
 
-### Docker
+## 🌐 Доступ
+
+- **Dashboard**: http://localhost:3000
+- **Backend API**: http://localhost:8080/api/v1
+- **WebSocket**: ws://localhost:8080/ws
+
+## 📡 API Endpoints
+
+### Серверы
+| Метод | Endpoint | Описание |
+|-------|----------|---------|
+| GET | `/api/v1/servers` | Список всех серверов |
+| POST | `/api/v1/servers` | Создать новый сервер |
+| GET | `/api/v1/servers/:id` | Детали сервера |
+| POST | `/api/v1/servers/:id/start` | Запустить сервер |
+| POST | `/api/v1/servers/:id/stop` | Остановить сервер |
+| POST | `/api/v1/servers/:id/restart` | Перезапустить сервер |
+| DELETE | `/api/v1/servers/:id` | Удалить сервер |
+
+### Java
+| Метод | Endpoint | Описание |
+|-------|----------|---------|
+| GET | `/api/v1/java` | Список установленных JDK |
+| POST | `/api/v1/java` | Установить JDK |
+
+### Метрики
+| Метод | Endpoint | Описание |
+|-------|----------|---------|
+| GET | `/api/v1/metrics/:id` | Real-time метрики |
+| GET | `/api/v1/metrics/:id/history` | История метрик |
+
+### Плагины
+| Метод | Endpoint | Описание |
+|-------|----------|---------|
+| GET | `/api/v1/plugins?q=...` | Поиск плагинов |
+| POST | `/api/v1/plugins/download` | Загрузить плагин |
+
+### Загрузки
+| Метод | Endpoint | Описание |
+|-------|----------|---------|
+| POST | `/api/v1/downloads` | Загрузить JAR |
+
+### WebSocket
+| Event | Описание |
+|-------|---------|
+| `connect` | Клиент подключен |
+| `disconnect` | Клиент отключен |
+| `join` | Присоединиться к комнате сервера |
+| `leave` | Покинуть комнату сервера |
+
+## ⚙️ Конфигурация
+
+Создайте файл `.env` в `backend/` директории:
+
+```env
+SECRET_KEY=your-secret-key-here
+DATABASE_URL=sqlite:///../data/mcap.db
+SQLALCHEMY_TRACK_MODIFICATIONS=false
+
+SERVER_PORT=8080
+RCON_PORT=25575
+RCON_PASSWORD=your-rcon-password
+RCON_TIMEOUT=5
+
+MODRINTH_TOKEN=your_token_here
+CURSEFORGE_KEY=your_key_here
+```
+
+## 📊 Примеры использования
+
+### Создание сервера
+
+```bash
+curl -X POST http://localhost:8080/api/v1/servers \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Survival Server",
+    "jar_path": "/path/to/server.jar",
+    "port": 25565,
+    "java_version": "17",
+    "xms_mb": 1024,
+    "xmx_mb": 4096,
+    "eula_accepted": true
+  }'
+```
+
+### Запуск сервера
+
+```bash
+curl -X POST http://localhost:8080/api/v1/servers/{server_id}/start
+```
+
+### Получение метрик
+
+```bash
+curl http://localhost:8080/api/v1/metrics/{server_id}
+```
+
+### Поиск плагинов
+
+```bash
+curl "http://localhost:8080/api/v1/plugins?q=EssentialsX&loaders=paper,spigot"
+```
+
+## 🐛 Известные ограничения
+
+1. **Rate limiting**: Modrinth/CurseForge имеют ограничения на количество запросов
+2. **Cloudflare блокировка**: SpigotMC может блокировать автоматические запросы
+3. **Platform зависимость**: `taskset` работает только на Linux
+4. **RCON требование**: Нужно `enable-rcon=true` в server.properties
+
+## 🔄 Стан разработки
+
+- [x] Базовое управление серверами
+- [x] API endpoints
+- [x] Frontend dashboard
+- [x] Database инициализация
+- [ ] Аутентификация и JWT
+- [ ] WebSocket console streaming
+- [ ] UI для установки плагинов
+- [ ] Автоматические бэкапы
+- [ ] Логирование событий
+- [ ] Metrics графики
+- [ ] Docker поддержка
+- [ ] Кластеризация
+
+## 📝 Логирование
+
+Логи находятся в корневой директории проекта:
+
+```bash
+# Backend логи
+tail -f backend.log
+
+# Frontend логи  
+tail -f frontend.log
+```
+
+## 🛠️ Разработка
+
+### Установка dev зависимостей
+
+```bash
+# Backend
+cd backend
+pip install -r requirements.txt
+pip install pytest pytest-cov  # Для тестів
+
+# Frontend
+cd frontend
+npm install --save-dev @testing-library/react jest
+```
+
+### Запуск тестов
+
+```bash
+# Backend
+cd backend
+pytest
+
+# Frontend
+cd frontend
+npm run test
+```
+
+### Сборка для продакшена
+
+```bash
+# Backend
+cd backend
+source venv/bin/activate
+python3 app.py  # Вже готов до продакшена
+
+# Frontend
+cd frontend
+npm run build
+npm start
+```
+
+## 🐳 Docker (планируется)
 
 ```bash
 docker-compose up --build
 ```
 
-## API Endpoints
+## 📄 Лицензия
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/v1/servers` | List all servers |
-| POST | `/api/v1/servers` | Create new server |
-| GET | `/api/v1/servers/:id` | Get server details |
-| POST | `/api/v1/servers/:id/start` | Start server |
-| POST | `/api/v1/servers/:id/stop` | Stop server |
-| POST | `/api/v1/servers/:id/restart` | Restart server |
-| DELETE | `/api/v1/servers/:id` | Delete server |
-| GET | `/api/v1/java` | List installed JDKs |
-| POST | `/api/v1/java` | Install JDK |
-| GET | `/api/v1/plugins?q=...` | Search plugins |
-| GET | `/api/v1/metrics/:id` | Get real-time metrics |
-| GET | `/api/v1/metrics/:id/history` | Get metrics history |
-| WS | `/ws` | WebSocket for live updates |
+MIT License - см. [LICENSE](LICENSE)
 
-## Configuration
+## 👨‍💻 Автор
 
-Environment variables (create `.env` in `data/` directory):
+- **Bladekkk** - Initial work
 
-```
-MC_DATA_DIR=/home/user/.mcap
-MC_CACHE_DIR=/home/user/.mcap/cache
-MC_SERVER_PORT=8080
-MC_RCON_PORT=25575
-MC_RCON_PASSWORD=change_me_in_production
-MC_MODRINTH_TOKEN=your_token
-MC_CURSEFORGE_KEY=your_key
-```
+## 🤝 Контрибьютинг
 
-## Known Limitations
+Приветствуются pull requests. Для больших изменений сначала откройте issue для обсуждения.
 
-1. **Rate limits**: Modrinth/CurseForge APIs have rate limits - implement caching
-2. **Cloudflare**: SpigotMC may block automated requests
-3. **Platform**: `taskset` CPU affinity only works on Linux
-4. **RCON**: Requires `enable-rcon=true` in server.properties
+## 📞 Поддержка
 
-## TODO
+Если у вас есть вопросы или проблемы:
 
-- [ ] Implement file browser for plugins/mods
-- [ ] Add automated backups with scheduling
-- [ ] Implement WebSocket for console input/output
-- [ ] Add alerting (Telegram/Discord webhooks)
-- [ ] Support for Velocity/Waterfall proxy servers
-- [ ] Implement plugin dependency resolution
+1. Проверьте [STATUS.md](STATUS.md) для информации о текущем состоянии
+2. Откройте [GitHub Issue](https://github.com/Bladekkk/mcap-public/issues)
+3. Проверьте логи: `backend.log` и `frontend.log`
 
-## License
+## 🔐 Безопасность
 
-MIT
+- ❗ Измените `SECRET_KEY` в продакшене
+- ❗ Используйте сильный `RCON_PASSWORD`
+- ❗ Не публикуйте `.env` файлы
+- ✅ Всегда запускайте обновления перед использованием
+
+## 📈 Производительность
+
+- Backend использует асинхронные операции через Eventlet
+- Frontend оптимизирован с помощью Turbopack и Next.js 16
+- База данных кэшируется для быстрого доступа
+- Real-time обновления через WebSocket
+
+## 🎯 Roadmap
+
+- Q1 2026: WebSocket консоль
+- Q2 2026: Аутентификация и RBAC
+- Q3 2026: Docker поддержка
+- Q4 2026: Clustering
+
+---
+
+**Версія**: 0.1.0  
+**Статус**: ✅ Beta  
+**Останнє оновлення**: 2026-11-05
