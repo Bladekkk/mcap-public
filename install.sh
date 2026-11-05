@@ -182,6 +182,12 @@ fi
 echo -e "${YELLOW}📦 Установка Go зависимостей...${NC}"
 go mod tidy
 
+# Verify go.sum exists
+if [ ! -f "go.sum" ]; then
+    echo -e "${YELLOW}⚠️  Создание go.sum...${NC}"
+    go mod tidy
+fi
+
 # Run database migrations and start backend
 echo -e "${GREEN}🗄️  Миграция базы данных и запуск backend...${NC}"
 go run cmd/main.go &
