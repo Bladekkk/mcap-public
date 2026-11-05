@@ -90,22 +90,28 @@ install_go() {
         echo -e "${YELLOW}📦 Установка Go...${NC}"
         GO_VERSION="1.22.0"
         GO_TAR="go${GO_VERSION}.linux-amd64.tar.gz"
+        GO_URL="https://dl.google.com/go/${GO_TAR}"
         
         # Download Go
         if command -v wget &> /dev/null; then
-            wget -q https://go.dev/dl/${GO_TAR}
+            wget -q ${GO_URL} -O /tmp/${GO_TAR}
         else
-            curl -sLO https://go.dev/dl/${GO_TAR}
+            curl -sL ${GO_URL} -o /tmp/${GO_TAR}
+        fi
+        
+        if [ ! -f /tmp/${GO_TAR} ] || [ ! -s /tmp/${GO_TAR} ]; then
+            echo -e "${RED}❌ Не удалось скачать Go${NC}"
+            exit 1
         fi
         
         # Extract to /usr/local
         sudo rm -rf /usr/local/go
-        sudo tar -C /usr/local -xzf ${GO_TAR}
-        rm ${GO_TAR}
+        sudo tar -C /usr/local -xzf /tmp/${GO_TAR}
+        rm /tmp/${GO_TAR}
         
-        # Add to PATH
-        echo 'export PATH=$PATH:/usr/local/go/bin' | sudo tee -a /etc/profile.d/go.sh
+        # Add to PATH for current session
         export PATH=$PATH:/usr/local/go/bin
+        echo 'export PATH=$PATH:/usr/local/go/bin' | sudo tee -a /etc/profile.d/go.sh >/dev/null
     else
         echo -e "${GREEN}✅ Go уже установлен${NC}"
     fi
