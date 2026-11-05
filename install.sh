@@ -88,7 +88,26 @@ install_deps() {
 install_go() {
     if ! command -v go &> /dev/null; then
         echo -e "${YELLOW}📦 Установка Go...${NC}"
-        curl -fsSL https://raw.githubusercontent.com/canonical/go-deb/main/install.sh | sudo bash
+        GO_VERSION="1.22.0"
+        GO_TAR="go${GO_VERSION}.linux-amd64.tar.gz"
+        
+        # Download Go
+        if command -v wget &> /dev/null; then
+            wget -q https://go.dev/dl/${GO_TAR}
+        else
+            curl -sLO https://go.dev/dl/${GO_TAR}
+        fi
+        
+        # Extract to /usr/local
+        sudo rm -rf /usr/local/go
+        sudo tar -C /usr/local -xzf ${GO_TAR}
+        rm ${GO_TAR}
+        
+        # Add to PATH
+        echo 'export PATH=$PATH:/usr/local/go/bin' | sudo tee -a /etc/profile.d/go.sh
+        export PATH=$PATH:/usr/local/go/bin
+    else
+        echo -e "${GREEN}✅ Go уже установлен${NC}"
     fi
 }
 
