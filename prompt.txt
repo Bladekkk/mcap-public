@@ -1,0 +1,124 @@
+Ты — senior full-stack разработчик с опытом создания панелей управления игровыми серверами (аналоги: Pterodactyl, AMP, Crafty Controller). Спроектируй и реализуй с нуля полноценную админ-панель для управления Minecraft-серверами.
+
+## Стек и архитектура (предложи и обоснуй)
+- Backend: Node.js (TypeScript, NestJS/Express) или Go — на твой выбор, обоснуй
+- Frontend: React/Next.js + Tailwind CSS + shadcn/ui (или аналог для красивого UI)
+- БД: SQLite (простота) или PostgreSQL (масштаб) — обоснуй выбор
+- WebSocket (socket.io) для live-логов, статуса, метрик
+- Планировщик задач (node-cron / bullmq) для фоновых скачиваний и мониторинга
+- Docker (опционально) для изоляции серверов, но должна работать и без него
+
+Структура проекта: monorepo (backend + frontend + shared), чёткое разделение слоёв (controllers → services → repositories), типизация всего API (zod/class-validator).
+
+## Функциональные требования
+
+### 1. Автоустановка зависимостей
+- При первом запуске панель определяет ОС (Windows/Linux/macOS) и архитектуру (x64/arm64).
+- Автоматически скачивает нужную версию Java через Adoptium API:
+  `https://api.adoptium.net/v3/binary/latest/{feature_version}/ga/{os}/{arch}/jdk/hotspot/normal/eclipse`
+- Кэширует JDK локально, не переустанавливает при наличии. Поддерживает несколько версий одновременно (8/11/17/21).
+- Маппинг ядро+версия → Java:
+  - 1.12 и ниже → Java 8
+  - 1.16–1.17 → Java 11
+  - 1.18–1.20.4 → Java 17
+  - 1.20.5+ → Java 21
+- UI: статус установленных JDK, кнопка «Установить», выбор версии вручную.
+
+### 2. Автозагрузка jar-файлов с официальных источников
+Сервис `Downloader` с провайдерами под каждое ядро:
+- **Vanilla** — Mojang piston-meta: `https://piston-meta.mojang.com/mc/game/version_manifest_v2.json` → JSON версии → `server.url`
+- **Paper / Velocity / Waterfall** — PaperMC API v2: `https://api.papermc.io/v2/projects/paper/versions/{ver}/builds`
+- **Fabric** — `https://meta.fabricmc.net/v2/versions/loader/{game_version}` + installer
+- **Forge** — maven.minecraftforge.net (promotions_slim.json + installer jar)
+- **NeoForge** — maven.neoforged.net (releases API)
+- **Purpur / Pufferfish / Spigot** — соответствующие API/зеркала
+- **Quilt** — meta.quiltmc.org
+Каждый провайдер возвращает список доступных версий и build-номеров. Скачивание с прогресс-баром, checksum-валидацией (SHA1/MD5), retry при ошибках, кэш скачанных jar в `./cache/jars`.
+
+### 3. Создание сервера с нуля
+Мастер (wizard) из шагов:
+1. Имя сервера + папка
+2. Ядро (Paper, Purpur, Vanilla, Fabric, Forge, NeoForge, Quilt, Velocity и т.д.)
+3. Версия MC (подгружается динамически под выбранное ядро)
+4. Версия ядра/build (если применимо)
+5. Java-версия (авто-подбор, но можно сменить)
+6. Память (Xms/Xmx), количество ядер (taskset/cpu affinity на Linux, affinity на Windows)
+7. Доп. JVM-флаги (Aikar's flags как пресет)
+8. EULA accept (обязательный чекбокс)
+После создания: скачивание jar, создание `eula.txt`, `server.properties`, генерация структуры папок (`plugins/`, `mods/`, `world/`, `logs/`, `backups/`).
+
+### 4. Переключение между серверами
+- Сайдбар/дашборд со списком всех серверов: статус (running/stopped/starting/crashed), онлайн, TPS, потребление RAM/CPU.
+- Быстрое переключение без перезагрузки страницы (SPA + WebSocket-подписка на выбранный сервер).
+- Индикаторы статуса в реальном времени, бейджи (версия, ядро, порт).
+
+### 5. База данных
+- SQLite или PostgreSQL. Таблицы: `servers`, `jdk_versions`, `downloaded_jars`, `plugins`, `mods`, `metrics_history`, `users`, `audit_log`.
+- ORM: Prisma / Drizzle / GORM. Миграции обязательно.
+
+### 6. Парсинг популярных сайтов для скачивания плагинов/модов
+Сервис-агрегатор, фильтрующий контент по ядру и версии сервера:
+- **Modrinth** — официальный API: `https://api.modrinth.com/v2/search?facets=[["categories:paper"],["versions:1.20.4"]]`
+- **Hangar** (PaperMC) — `https://hangar.papermc.io/api/v1/projects`
+- **CurseForge** — через официальный API (нужен ключ) или скрапинг с уважением к robots.txt
+- **SpigotMC** — скрапинг (Cloudflare может блокировать, предусмотреть fallback/ручной ввод URL)
+- **Bukkit/Dev.bukkit.org** — устаревший, но полезный
+- **GitHub Releases** — для модов, которых нет в каталогах
+Функции:
+- Поиск по названию, сортировка по загрузкам/обновлению, фильтры (ядро, версия MC, категория).
+- Автоподбор совместимости (не показывать плагин, если нет сборки под версию/ядро).
+- Скачивание прямо в `plugins/` или `mods/` сервера одной кнопкой.
+- Показ зависимостей плагина (например, Vault, PlaceholderAPI) с предложением установить их.
+- Кэширование результатов поиска (TTL 5–10 мин), rate-limit для API.
+
+### 7. Управление ресурсами сервера
+- Настройки `-Xms`, `-Xmx`, флаги JVM (Aikar's flags — пресет по умолчанию).
+- Привязка к CPU-ядрам (Linux: `taskset`, Windows: `start /affinity`).
+- Приоритет процесса (nice / SetPriorityClass).
+- Валидация: Xmx не больше доступной RAM хоста, предупреждения при овербукинге.
+- Сохранение профилей запуска (например, «Production», «Test»).
+- Hot-reload где возможно, иначе — предупреждение о рестарте.
+
+### 8. Мониторинг
+Реал-тайм метрики через WebSocket + история в БД:
+- **TPS** (через RCON `forge tps` / `spark tps` / плагин или парсинг логов), MSPT
+- **Онлайн-игроки**: список с ping, режимом, временем входа (RCON `list` + парсинг)
+- **RAM**: RSS процесса + heap usage (через JMX или парсинг `spark`)
+- **CPU**: % загрузки процесса
+- **Размер мира**: `du -sh world/` периодически + история роста
+- **Размер логов, бэкапов, папки сервера**
+- **Аптайм**, количество рестартов, история падений (crash reports)
+- Графики (Recharts / Chart.js): TPS за 24ч, RAM/CPU, онлайн-график
+- Алерты: TPS < 15, RAM > 90%, краш — уведомление в UI (и опционально в Telegram/Discord webhook)
+
+### 9. UI/UX — КРАСИВЫЙ веб-интерфейс
+Требования к дизайну:
+- Тёмная тема по умолчанию (светлая — опционально), glassmorphism/neon-акценты в стиле игровых дашбордов.
+- Библиотека: Tailwind + shadcn/ui или Mantine; иконки — Lucide.
+- Главный экран: сетка карточек серверов с живыми метриками (TPS, онлайн, RAM), крупные кнопки Start/Stop/Restart.
+- Экран сервера: табы — Console (live-логи с автоскроллом и подсветкой ERROR/WARN), Metrics (графики), Files (проводник), Plugins/Mods (каталог + установленные), Settings (ресурсы, свойства), Backups.
+- Live-консоль: цветной вывод, поле ввода команд через RCON, история команд.
+- Мастер создания сервера — пошаговый wizard с прогресс-барами скачивания.
+- Адаптивность (десктоп в приоритете, но мобильный — рабочий).
+- Микроанимации (framer-motion), skeleton-загрузки, тосты для уведомлений.
+- Никакого «сырого» вида — аккуратные отступы, единая типографика (Inter), скругления, тени.
+- Скриншоты/макеты ключевых экранов опиши текстом перед кодом.
+
+### 10. Безопасность и качество
+- Аутентификация (JWT + refresh, либо session), роль админа.
+- RCON с паролем, не светить в логи.
+- Валидация всех входных данных, защита от path traversal при работе с файлами.
+- Санитизация имён серверов (только безопасные символы).
+- Audit log: кто что запускал/останавливал/ставил.
+- Graceful shutdown серверов (stop → wait → kill).
+
+## Формат ответа
+1. Сначала — краткое описание архитектуры и дерева проекта.
+2. Схема БД (миграции).
+3. Ключевые модули backend (Downloader, JavaManager, ServerManager, MetricsCollector, PluginAggregator, RconService) — с реальным кодом.
+4. API-контракт (OpenAPI/REST + WS-события).
+5. Frontend: структура страниц, ключевые компоненты, код критичных экранов (дашборд, консоль, wizard, каталог плагинов).
+6. Конфиг для запуска (docker-compose или .env + npm scripts) и README с инструкцией.
+7. Отдельно — список известных ограничений и что делать в проде (rate-limits API Modrinth/CurseForge, Cloudflare у Spigot, кроссплатформенность taskset).
+
+Начни с архитектуры и схемы БД, затем переходи к коду по модулям. Код должен быть рабочим, типизированным, с обработкой ошибок и без заглушек типа «// TODO implement». Если какой-то внешний API требует ключ — предусмотри конфиг и graceful degradation.
