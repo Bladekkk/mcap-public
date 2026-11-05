@@ -1,6 +1,21 @@
 # MCAP - Minecraft Server Management Panel
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Go Version](https://img.shields.io/badge/Go-1.22-blue)](https://golang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org/)
+
 Advanced admin panel for managing Minecraft servers with support for multiple server types (Vanilla, Paper, Fabric, Forge, Quilt, Purpur, Velocity, Waterfall) and automated dependency management.
+
+## Supported Systems
+
+| System | Version | Install Command |
+|--------|---------|-----------------|
+| Ubuntu | 20.04+ | `./install.sh` |
+| Debian | 11+ | `./install.sh` |
+| Fedora | 36+ | `./install.sh` |
+| Arch | rolling | `./install.sh` |
+| WSL | Windows 10/11 | `./install.sh` |
+| macOS | 12+ | `./install.sh` |
 
 ## Features
 
@@ -54,20 +69,40 @@ MCAP-project/
 
 ## Installation
 
-### Prerequisites
-- Go 1.22+
-- Node.js 18+ and npm
-- SQLite3 (for migrations)
+### One-Command Install (Recommended)
 
-### Local Development
+Download and run the installer script:
 
 ```bash
-# Backend
+curl -fsSL https://raw.githubusercontent.com/Bladekkk/mcap-public/master/install.sh | bash
+```
+
+That's it. The script will:
+1. Detect your OS automatically
+2. Install all dependencies (Go, Node.js, SQLite)
+3. Run database migrations
+4. Start backend (port 8080) and frontend (port 3000)
+
+### Manual Install
+
+If you prefer to install manually:
+
+#### Prerequisites
+- Go 1.22+
+- Node.js 18+ and npm
+- SQLite3
+
+#### Backend
+
+```bash
 cd backend
 go mod tidy
 go run cmd/main.go
+```
 
-# Frontend (new terminal)
+#### Frontend (new terminal)
+
+```bash
 cd frontend
 npm install
 npm run dev
